@@ -1,75 +1,74 @@
 import React, { useState } from 'react'
 
-export default function App() {
-	const [currentPalette, setCurrentPalette] = useState([])
-	const [savedPalettes, setSavedPalettes] = useState([])
+const unitFactors = {
+	meter: 1,
+	kilometer: 1000,
+	centimeter: 0.01,
+	mile: 1609.34
+}
 
-	// Function to generate a single random hex color
-	const generateColor = () => {
-		return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
-	}
+export default function UnitConverter() {
+	const [fromUnit, setFromUnit] = useState('meter')
+	const [toUnit, setToUnit] = useState('kilometer')
+	const [fromValue, setFromValue] = useState('')
+	const [convertedValue, setConvertedValue] = useState(null)
 
-	// Generate new palette (5 colors)
-	const handleGenerate = () => {
-		const newPalette = Array.from({ length: 5 }, generateColor)
-		setCurrentPalette(newPalette)
-	}
+	const handleConvert = () => {
+		if (fromValue === '' || isNaN(fromValue)) return
 
-	// Save current palette
-	const handleSave = () => {
-		if (currentPalette.length === 5) {
-			setSavedPalettes([...savedPalettes, currentPalette])
-		}
-	}
-
-	// Delete saved palette by index
-	const handleDelete = (index) => {
-		const updated = savedPalettes.filter((_, i) => i !== index)
-		setSavedPalettes(updated)
+		const valueInMeters = parseFloat(fromValue) * unitFactors[fromUnit]
+		const result = valueInMeters / unitFactors[toUnit]
+		setConvertedValue(result.toFixed(3))
 	}
 
 	return (
-		<div className="cg h-auto min-h-[600px] flex flex-col justify-center items-center p-4 space-y-6">
-			<button className="bg-amber-300 p-4 rounded" id="generate" onClick={handleGenerate}>
-				Generate
-			</button>
+		<div className="flex flex-col items-center space-y-4 mt-10">
+			<div className="flex space-x-4">
+				<select
+					id="fromUnit"
+					value={fromUnit}
+					onChange={(e) => setFromUnit(e.target.value)}
+					className="p-2 border rounded"
+				>
+					<option value="meter">Meter</option>
+					<option value="kilometer">Kilometer</option>
+					<option value="centimeter">Centimeter</option>
+					<option value="mile">Mile</option>
+				</select>
 
-			<div id="current-palette" className="flex space-x-2">
-				{currentPalette.map((color, index) => (
-					<div
-						key={index}
-						className="color-block w-20 h-20 flex items-center justify-center text-white font-bold rounded"
-						style={{ backgroundColor: color }}
-					>
-						{color}
-					</div>
-				))}
+				<select
+					id="toUnit"
+					value={toUnit}
+					onChange={(e) => setToUnit(e.target.value)}
+					className="p-2 border rounded"
+				>
+					<option value="meter">Meter</option>
+					<option value="kilometer">Kilometer</option>
+					<option value="centimeter">Centimeter</option>
+					<option value="mile">Mile</option>
+				</select>
 			</div>
 
-			{currentPalette.length === 5 && (
-				<button id="save" className="bg-green-400 px-4 py-2 rounded" onClick={handleSave}>
-					Save
-				</button>
-			)}
+			<input
+				type="number"
+				id="fromValue"
+				value={fromValue}
+				onChange={(e) => setFromValue(e.target.value)}
+				placeholder="Enter value"
+				className="p-2 border rounded w-64"
+			/>
 
-			<div id="saved-palettes" className="flex flex-col space-y-4 w-full items-center">
-				{savedPalettes.map((palette, index) => (
-					<div key={index} className="flex items-center space-x-2">
-						{palette.map((color, i) => (
-							<div
-								key={i}
-								className="color-block w-16 h-16 rounded"
-								style={{ backgroundColor: color }}
-							></div>
-						))}
-						<button
-							className="delete-palette-button bg-red-500 text-white px-2 py-1 rounded"
-							onClick={() => handleDelete(index)}
-						>
-							Delete
-						</button>
-					</div>
-				))}
+			<button
+				id="convert"
+				onClick={handleConvert}
+				className="bg-blue-500 text-white px-4 py-2 rounded"
+			>
+				Convert
+			</button>
+
+			<div id="outputValue" className="text-xl font-semibold mt-4">
+				{convertedValue !== null &&
+					`${fromValue} ${fromUnit} = ${convertedValue} ${toUnit}`}
 			</div>
 		</div>
 	)
